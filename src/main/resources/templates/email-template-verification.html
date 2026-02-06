@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Account Activation</title>
+    <style type="text/css">
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            background-color: #007bff;
+            padding: 40px 20px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .content {
+            padding: 40px 30px;
+            line-height: 1.6;
+            color: #333333;
+        }
+
+        .button-container {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: #ffffff !important;
+            padding: 14px 32px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 16px;
+            display: inline-block;
+        }
+
+        .footer {
+            background-color: #f1f3f5;
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #777777;
+        }
+
+        .link-text {
+            color: #007bff;
+            word-break: break-all;
+            font-size: 14px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Welcome to Online Payment System</h1>
+    </div>
+
+    <div class="content">
+        <p>Hi, <strong th:text="${userName}">User</strong>!</p>
+
+        <p th:text="${messageContent}">Verification message goes here.</p>
+
+        <div class="button-container">
+            <a th:href="${actionUrl}" class="btn">Confirm Account</a>
+        </div>
+
+        <p style="font-size: 14px; color: #666;">If the button above doesn't work, copy and paste this link into your
+            browser:</p>
+        <p><a th:href="${actionUrl}" class="link-text" th:text="${actionUrl}">URL link here</a></p>
+    </div>
+
+    <div class="footer">
+        <p>If you did not create an account, you can safely ignore this email.</p>
+        <p>&copy; 2026 Online Payment System. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>

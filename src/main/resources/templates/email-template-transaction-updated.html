@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Transaction Update</title>
+    <style type="text/css">
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Dynamic Header Color */
+        .header-paid {
+            background-color: #28a745;
+        }
+
+        .header-rejected {
+            background-color: #dc3545;
+        }
+
+        .header {
+            padding: 40px 20px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .content {
+            padding: 40px 30px;
+            line-height: 1.6;
+            color: #333333;
+        }
+
+        .status-banner {
+            text-align: center;
+            font-weight: 700;
+            font-size: 18px;
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .status-paid {
+            color: #28a745;
+            background-color: #eafaf1;
+        }
+
+        .status-rejected {
+            color: #dc3545;
+            background-color: #fdf2f2;
+        }
+
+        .footer {
+            background-color: #f1f3f5;
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #777777;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header" th:classappend="${status == 'Paid' ? 'header-paid' : 'header-rejected'}">
+        <h1 th:text="${status == 'Paid' ? 'Payment Successful' : 'Transaction Rejected'}">Update</h1>
+    </div>
+    <div class="content">
+        <p>Hi, <strong th:text="${userName}">User</strong>!</p>
+        <p>There has been an update to your transaction status for code: <strong
+                th:text="${transactionCode}">TRX-0000</strong>.</p>
+
+        <div class="status-banner" th:classappend="${status == 'Paid' ? 'status-paid' : 'status-rejected'}">
+            Status: <span th:text="${status}">STATUS</span>
+        </div>
+
+        <p th:text="${messageContent}">Details about the update.</p>
+    </div>
+    <div class="footer">
+        <p>For any questions, please contact our support team.</p>
+        <p>&copy; 2026 Online Payment System. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>

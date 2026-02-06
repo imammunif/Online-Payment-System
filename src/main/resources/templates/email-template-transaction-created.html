@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Transaction Created</title>
+    <style type="text/css">
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .header { background-color: #007bff; padding: 40px 20px; text-align: center; color: #ffffff; }
+        .content { padding: 40px 30px; line-height: 1.6; color: #333333; }
+        .transaction-box { background-color: #f8f9fa; border-left: 4px solid #007bff; padding: 20px; margin: 24px 0; border-radius: 6px; text-align: center; }
+        .transaction-code { font-family: 'Courier New', monospace; font-size: 20px; font-weight: 700; color: #007bff; }
+        .footer { background-color: #f1f3f5; padding: 20px; text-align: center; font-size: 13px; color: #777777; }
+        h1 { margin: 0; font-size: 24px; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Transaction Created</h1>
+        </div>
+        <div class="content">
+            <p>Hi, <strong th:text="${userName}">User</strong>!</p>
+            <p>Your transaction has been successfully created and is now being processed.</p>
+            
+            <div class="transaction-box">
+                <div style="font-size: 14px; color: #666;">Transaction Code</div>
+                <div class="transaction-code" th:text="${transactionCode}">TRX-0000</div>
+            </div>
+
+            <p style="font-size: 14px; color: #666;">We will notify you via email as soon as the status of your transaction changes.</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 Online Payment System. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
