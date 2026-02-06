@@ -7,6 +7,4 @@ public interface TransactionStatusHistoryService {
 
     PaginatedResponseDto<TransactionStatusHistoryResponseDto> getAll(Integer page, Integer size);
 
-    PaginatedResponseDto<TransactionStatusHistoryResponseDto> getAllByGatewayId(Integer page, Integer size);
-
 }

@@ -22,22 +22,12 @@ public class TransactionStatusHistoryController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('SA')")
+    @PreAuthorize("hasAnyAuthority('SA', 'GA')")
     public ResponseEntity<PaginatedResponseDto<TransactionStatusHistoryResponseDto>> getAll(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "5") Integer size
     ) {
         PaginatedResponseDto<TransactionStatusHistoryResponseDto> res = transactionStatusHistoryService.getAll(page, size);
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
-
-    @GetMapping("/gateways")
-    @PreAuthorize("hasAuthority('GA')")
-    public ResponseEntity<PaginatedResponseDto<TransactionStatusHistoryResponseDto>> getByGatewayId(
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "5") Integer size
-    ) {
-        PaginatedResponseDto<TransactionStatusHistoryResponseDto> res = transactionStatusHistoryService.getAllByGatewayId(page, size);
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
