@@ -5,6 +5,6 @@ import com.dansmultipro.ops.dto.transactionstatushistory.TransactionStatusHistor
 
 public interface TransactionStatusHistoryService {
 
-    PaginatedResponseDto<TransactionStatusHistoryResponseDto> getAll(Integer page, Integer size);
+    PaginatedResponseDto<TransactionStatusHistoryResponseDto> getAll(Integer page, Integer size, String roleCode, String filterId);
 
 }

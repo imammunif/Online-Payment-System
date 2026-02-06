@@ -2,6 +2,7 @@ package com.dansmultipro.ops.filter;
 
 import com.dansmultipro.ops.pojo.AuthorizationPoJo;
 import com.dansmultipro.ops.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,16 +37,19 @@ public class TokenFilter extends OncePerRequestFilter {
 
         if (!matched) {
             try {
-                var authHeader = request.getHeader("Authorization");
+                String authHeader = request.getHeader("Authorization");
                 if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                     response.setStatus(HttpStatus.UNAUTHORIZED.value());
                     return;
                 }
-                var token = authHeader.substring(7);
-                var claims = JwtUtil.validateToken(token);
+                String token = authHeader.substring(7);
+                Claims claims = JwtUtil.validateToken(token);
 
-                var data = new AuthorizationPoJo(UUID.fromString(claims.get("id").toString()));
-                var role = claims.get("roleCode").toString();
+                AuthorizationPoJo data = new AuthorizationPoJo(
+                        UUID.fromString(claims.get("id").toString()),
+                        claims.get("roleCode").toString()
+                );
+                String role = claims.get("roleCode").toString();
                 List<SimpleGrantedAuthority> simpleGrantedAuthorityList = List.of(
                         new SimpleGrantedAuthority(role)
                 );
