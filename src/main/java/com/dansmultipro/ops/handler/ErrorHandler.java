@@ -69,12 +69,19 @@ public class ErrorHandler {
         return new ResponseEntity<>(new ErrorResponseDto<>(errors), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(InactiveException.class)
-    public ResponseEntity<ErrorResponseDto<String>> handleInactiveException(
-            InactiveException ex
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponseDto<String>> handleInvalidCredentialsException(
+            InvalidCredentialsException ex
     ) {
         var errors = ex.getMessage();
         return new ResponseEntity<>(new ErrorResponseDto<>(errors), HttpStatus.UNAUTHORIZED);
+    }
+    @ExceptionHandler(RateLimiterException.class)
+    public ResponseEntity<ErrorResponseDto<String>> handleRateLimiterException(
+            RateLimiterException ex
+    ) {
+        var errors = ex.getMessage();
+        return new ResponseEntity<>(new ErrorResponseDto<>(errors), HttpStatus.TOO_MANY_REQUESTS);
     }
 
     @ExceptionHandler(NotFoundException.class)
