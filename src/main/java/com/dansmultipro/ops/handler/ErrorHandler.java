@@ -69,6 +69,14 @@ public class ErrorHandler {
         return new ResponseEntity<>(new ErrorResponseDto<>(errors), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(InactiveException.class)
+    public ResponseEntity<ErrorResponseDto<String>> handleInactiveException(
+            InactiveException ex
+    ) {
+        var errors = ex.getMessage();
+        return new ResponseEntity<>(new ErrorResponseDto<>(errors), HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorResponseDto<String>> handleNotFoundException(
             NotFoundException ex
@@ -91,14 +99,6 @@ public class ErrorHandler {
     ) {
         var errors = ex.getMessage();
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(InactiveException.class)
-    public ResponseEntity<ErrorResponseDto<String>> handleInactiveException(
-            InactiveException ex
-    ) {
-        var errors = ex.getMessage();
-        return new ResponseEntity<>(new ErrorResponseDto<>(errors), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(MissMatchException.class)
@@ -136,6 +136,14 @@ public class ErrorHandler {
     @ExceptionHandler(InvalidUuidException.class)
     public ResponseEntity<ErrorResponseDto<String>> handleInvalidIdException(
             InvalidUuidException ex
+    ) {
+        var errors = ex.getMessage();
+        return new ResponseEntity<>(new ErrorResponseDto<>(errors), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidRoleException.class)
+    public ResponseEntity<ErrorResponseDto<String>> handleInvalidIdException(
+            InvalidRoleException ex
     ) {
         var errors = ex.getMessage();
         return new ResponseEntity<>(new ErrorResponseDto<>(errors), HttpStatus.BAD_REQUEST);

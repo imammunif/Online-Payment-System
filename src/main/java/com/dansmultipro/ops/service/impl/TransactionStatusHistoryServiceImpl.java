@@ -4,6 +4,7 @@ import com.dansmultipro.ops.constant.RoleCode;
 import com.dansmultipro.ops.dto.PaginatedResponseDto;
 import com.dansmultipro.ops.dto.transactionstatushistory.TransactionStatusHistoryResponseDto;
 import com.dansmultipro.ops.exception.InvalidPageException;
+import com.dansmultipro.ops.exception.InvalidRoleException;
 import com.dansmultipro.ops.exception.NotFoundException;
 import com.dansmultipro.ops.model.TransactionStatusHistory;
 import com.dansmultipro.ops.repository.TransactionStatusHistoryRepo;
@@ -16,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,42 +35,24 @@ public class TransactionStatusHistoryServiceImpl extends BaseService implements 
     @Cacheable(value = "histories", key = "'page:' + #page + 'size:' + #size + 'roleCode:' + #roleCode + 'filterId:' + #filterId")
     @Override
     public PaginatedResponseDto<TransactionStatusHistoryResponseDto> getAll(Integer page, Integer size, String roleCode, String filterId) {
-        if (page < 1) {
-            throw new InvalidPageException("Invalid requested page, minimum 1");
-        }
-        if (size < 5) {
-            throw new InvalidPageException("Invalid requested page size, minimum 5");
-        }
+
+        validatePagination(page, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
 
         UUID userId = principalService.getPrincipal().getId();
         userRepo.findById(userId).orElseThrow(
                 () -> new NotFoundException("User not found")
         );
 
-        Pageable pageable = PageRequest.of(page - 1, size);
-        Page<TransactionStatusHistory> historyPage = null;
+        Page<TransactionStatusHistory> historyPage = fetchHistoryPage(roleCode, filterId, pageable);
 
-        if (RoleCode.SUPERADMIN.getCode().equals(roleCode)) {
-            historyPage = transactionStatusHistoryRepo.findByOrderByCreatedAtDesc(pageable);
-        }
-        if (RoleCode.GATEWAY.getCode().equals(roleCode)) {
-            historyPage = transactionStatusHistoryRepo.findAllByTransaction_GatewayIdOrderByCreatedAtDesc(
-                    UUID.fromString(filterId),
-                    pageable
-            );
-        }
-
-        List<TransactionStatusHistory> historyList = historyPage.getContent();
-        List<TransactionStatusHistoryResponseDto> responseDtoList = new ArrayList<>();
-        for (TransactionStatusHistory v : historyList) {
-            TransactionStatusHistoryResponseDto responseDto = new TransactionStatusHistoryResponseDto(
-                    v.getId(),
-                    v.getStatus().getName(),
-                    v.getTransaction().getCode(),
-                    v.getCreatedAt().format(timeFormat)
-            );
-            responseDtoList.add(responseDto);
-        }
+        List<TransactionStatusHistoryResponseDto> responseDtoList = historyPage.getContent().stream()
+                .map(v -> new TransactionStatusHistoryResponseDto(
+                        v.getId(),
+                        v.getStatus().getName(),
+                        v.getTransaction().getCode(),
+                        v.getCreatedAt().format(timeFormat)))
+                .toList();
 
         PaginatedResponseDto<TransactionStatusHistoryResponseDto> paginatedHistoryResponse = new PaginatedResponseDto<>(
                 responseDtoList,
@@ -78,6 +60,27 @@ public class TransactionStatusHistoryServiceImpl extends BaseService implements 
         );
 
         return paginatedHistoryResponse;
+    }
+
+    private Page<TransactionStatusHistory> fetchHistoryPage(String roleCode, String filterId, Pageable pageable) {
+        if (RoleCode.GATEWAY.getCode().equals(roleCode)) {
+            return transactionStatusHistoryRepo.findAllByTransaction_GatewayIdOrderByCreatedAtDesc(
+                    UUID.fromString(filterId),
+                    pageable
+            );
+        } else if (RoleCode.SUPERADMIN.getCode().equals(roleCode)) {
+            return transactionStatusHistoryRepo.findByOrderByCreatedAtDesc(pageable);
+        }
+        throw new InvalidRoleException("Invalid role");
+    }
+
+    private void validatePagination(Integer page, Integer size) {
+        if (page < 1) {
+            throw new InvalidPageException("Invalid requested page, minimum 1");
+        }
+        if (size < 5) {
+            throw new InvalidPageException("Invalid requested page size, minimum 5");
+        }
     }
 
 }
