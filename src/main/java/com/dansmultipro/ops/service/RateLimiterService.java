@@ -12,4 +12,6 @@ public interface RateLimiterService {
 
     void resetBucket(String email);
 
+    long getRemainingWaitSeconds(String email);
+
 }

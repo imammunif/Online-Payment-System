@@ -39,7 +39,8 @@ public class LoginController {
     ) {
         String email = data.getEmail();
         if (!rateLimiterService.allowRequest(email)) {
-            throw new RateLimiterException("Too many attempts, try again later.");
+            long remainingWaitSeconds = rateLimiterService.getRemainingWaitSeconds(email);
+            throw new RateLimiterException("too many attempts, try again in " + remainingWaitSeconds + " minute(s).");
         }
 
         try {
@@ -60,8 +61,8 @@ public class LoginController {
             ), HttpStatus.OK);
 
         } catch (AuthenticationException ex) {
-            long remaining = rateLimiterService.getRemainingAttempts(email);
-            throw new InvalidCredentialsException("Failed, wrong credentials. Remaining attempts: " + remaining);
+            long remainingAttempts = rateLimiterService.getRemainingAttempts(email) + 1;
+            throw new InvalidCredentialsException("failed, wrong credentials. Remaining attempts: " + remainingAttempts);
         }
     }
 

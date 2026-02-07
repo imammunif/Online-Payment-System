@@ -15,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateLimiterServiceImpl implements RateLimiterService {
 
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
+    private final Map<String, Long> bucketCreationTime = new ConcurrentHashMap<>();
+    private static final long RATE_LIMIT_DURATION_SECONDS = 300;
 
     @Override
     public Bucket createNewBucket() {
@@ -26,7 +28,10 @@ public class RateLimiterServiceImpl implements RateLimiterService {
 
     @Override
     public boolean allowRequest(String email) {
-        Bucket bucket = cache.computeIfAbsent(email, k -> createNewBucket());
+        Bucket bucket = cache.computeIfAbsent(email, k -> {
+            bucketCreationTime.put(email, System.currentTimeMillis());
+            return createNewBucket();
+        });
         return bucket.tryConsume(1);
     }
 
@@ -40,8 +45,26 @@ public class RateLimiterServiceImpl implements RateLimiterService {
     }
 
     @Override
-    public void resetBucket(String username) {
-        cache.remove(username);
+    public void resetBucket(String email) {
+        cache.remove(email);
+        bucketCreationTime.remove(email);
+    }
+
+    @Override
+    public long getRemainingWaitSeconds(String username) {
+        Long createdTime = bucketCreationTime.get(username);
+        if (createdTime == null) {
+            return 0;
+        }
+        long elapsedSeconds = (System.currentTimeMillis() - createdTime) / 1000;
+        long remainingSeconds = RATE_LIMIT_DURATION_SECONDS - elapsedSeconds;
+        if (remainingSeconds <= 0) {
+            resetBucket(username);
+            return 0;
+        }
+        remainingSeconds = (remainingSeconds + 59) / 60;
+
+        return remainingSeconds;
     }
 
 }
