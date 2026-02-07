@@ -47,11 +47,7 @@ public class TransactionStatusHistoryServiceImpl extends BaseService implements 
         Page<TransactionStatusHistory> historyPage = fetchHistoryPage(roleCode, filterId, pageable);
 
         List<TransactionStatusHistoryResponseDto> responseDtoList = historyPage.getContent().stream()
-                .map(v -> new TransactionStatusHistoryResponseDto(
-                        v.getId(),
-                        v.getStatus().getName(),
-                        v.getTransaction().getCode(),
-                        v.getCreatedAt().format(timeFormat)))
+                .map(this::mapToResponse)
                 .toList();
 
         PaginatedResponseDto<TransactionStatusHistoryResponseDto> paginatedHistoryResponse = new PaginatedResponseDto<>(
@@ -81,6 +77,15 @@ public class TransactionStatusHistoryServiceImpl extends BaseService implements 
         if (size < 5) {
             throw new InvalidPageException("Invalid requested page size, minimum 5");
         }
+    }
+
+    private TransactionStatusHistoryResponseDto mapToResponse(TransactionStatusHistory v) {
+        return new TransactionStatusHistoryResponseDto(
+                v.getId(),
+                v.getStatus().getName(),
+                v.getTransaction().getCode(),
+                v.getCreatedAt().format(timeFormat)
+        );
     }
 
 }
