@@ -11,6 +11,8 @@ public class UserGatewayResponseDto {
     private String gatewayName;
     private String version;
 
+    public UserGatewayResponseDto() {}
+
     public UserGatewayResponseDto(UUID id, String name, String email, String roleName, String gatewayName, String version) {
         this.id = id;
         this.name = name;

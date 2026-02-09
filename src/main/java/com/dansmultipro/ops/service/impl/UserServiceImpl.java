@@ -77,8 +77,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         );
     }
 
+    @Cacheable(value = "users", key = "'page:' + #page + 'size:' + #size")
     @Override
-    @Cacheable(value = "users", key = "'all'")
     public PaginatedResponseDto<UserResponseDto> getAllUserCustomers(Integer page, Integer size) {
         UserRole userRole = userRoleRepo.findByCode(RoleCode.CUSTOMER.getCode()).orElseThrow(
                 () -> new NotFoundException("Role not found")
@@ -112,6 +112,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         return paginatedUserResponse;
     }
 
+    @Cacheable(value = "user-gateways", key = "'page:' + #page + 'size:' + #size")
     @Override
     public PaginatedResponseDto<UserGatewayResponseDto> getAllUserGateways(Integer page, Integer size) {
         UserRole userRole = userRoleRepo.findByCode(RoleCode.GATEWAY.getCode()).orElseThrow(
@@ -146,8 +147,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         return paginatedUserResponse;
     }
 
-    @Override
     @Cacheable(value = "users", key = "#id")
+    @Override
     public UserResponseDto getById(String id) {
         UUID validId = validateUUID(id);
         User user = userRepo.findById(validId).orElseThrow(
@@ -156,9 +157,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         return new UserResponseDto(user.getId(), user.getName(), user.getEmail(), user.getUserRole().getName(), user.getActive().toString(), user.getVersion().toString());
     }
 
+    @CacheEvict(value = "users", allEntries = true)
     @Transactional(rollbackOn = Exception.class)
     @Override
-    @CacheEvict(value = "users", allEntries = true)
     public CreateResponseDto createUserCustomer(CreateUserCustomerRequestDto data) {
         UserRole userRole = userRoleRepo.findByCode(RoleCode.CUSTOMER.getCode()).orElseThrow(
                 () -> new NotFoundException("Role not found")
@@ -191,6 +192,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         return new CreateResponseDto(createdUser.getId(), ResponseMessage.CREATED.getMessage());
     }
 
+    @CacheEvict(value = "user-gateways", allEntries = true)
     @Transactional(rollbackOn = Exception.class)
     @Override
     public CreateResponseDto createUserGateway(CreateUserGatewayRequestDto data) {
