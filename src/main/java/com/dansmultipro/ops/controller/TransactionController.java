@@ -23,32 +23,12 @@ public class TransactionController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('SA')")
+    @PreAuthorize("hasAnyAuthority('SA', 'CUST', 'GA')")
     public ResponseEntity<PaginatedResponseDto<TransactionResponseDto>> getAllTransactions(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size
     ) {
         PaginatedResponseDto<TransactionResponseDto> res = transactionService.getAll(page, size);
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
-
-    @GetMapping("/customers")
-    @PreAuthorize("hasAuthority('CUST')")
-    public ResponseEntity<PaginatedResponseDto<TransactionResponseDto>> getAllByCustomerId(
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size
-    ) {
-        PaginatedResponseDto<TransactionResponseDto> res = transactionService.getAllByCustomerId(page, size);
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
-
-    @GetMapping("/gateways")
-    @PreAuthorize("hasAuthority('GA')")
-    public ResponseEntity<PaginatedResponseDto<TransactionResponseDto>> getAllByGatewayId(
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size
-    ) {
-        PaginatedResponseDto<TransactionResponseDto> res = transactionService.getAllByGatewayId(page, size);
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 

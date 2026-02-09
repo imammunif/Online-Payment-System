@@ -10,10 +10,6 @@ public interface TransactionService {
 
     PaginatedResponseDto<TransactionResponseDto> getAll(Integer page, Integer size);
 
-    PaginatedResponseDto<TransactionResponseDto> getAllByCustomerId(Integer page, Integer size);
-
-    PaginatedResponseDto<TransactionResponseDto> getAllByGatewayId(Integer page, Integer size);
-
     CreateResponseDto create(CreateTransactionRequestDto data);
 
     UpdateResponseDto update(String id, String action, Integer version);

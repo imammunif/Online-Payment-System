@@ -2,6 +2,7 @@ package com.dansmultipro.ops.service.impl;
 
 import com.dansmultipro.ops.config.RabbitMQConfig;
 import com.dansmultipro.ops.constant.ResponseMessage;
+import com.dansmultipro.ops.constant.RoleCode;
 import com.dansmultipro.ops.constant.StatusCode;
 import com.dansmultipro.ops.dto.CreateResponseDto;
 import com.dansmultipro.ops.dto.PaginatedResponseDto;
@@ -29,7 +30,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,93 +60,22 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
 
     @Override
     public PaginatedResponseDto<TransactionResponseDto> getAll(Integer page, Integer size) {
-        if (page < 1) {
-            throw new InvalidPageException("Invalid requested page, minimum 1");
-        }
-        if (size < 5) {
-            throw new InvalidPageException("Invalid requested page size, minimum 5");
-        }
+
+        validatePagination(page, size);
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Transaction> transactionPage = transactionRepo.findAll(pageable);
 
-        List<Transaction> transactionList = transactionPage.getContent();
-        List<TransactionResponseDto> transactionResponseDtoList = new ArrayList<>();
-        for (Transaction v : transactionList) {
-            TransactionResponseDto responseDto = new TransactionResponseDto(
-                    v.getId().toString(), v.getCode(), v.getTotalBill().toString(),
-                    v.getAccountNumber(), v.getStatus().getName(), v.getCustomer().getName(),
-                    v.getGateway().getName(), v.getProduct().getName());
-            transactionResponseDtoList.add(responseDto);
-        }
-
-        PaginatedResponseDto<TransactionResponseDto> paginatedTransactionResponse = new PaginatedResponseDto<>(
-                transactionResponseDtoList,
-                transactionPage.getTotalElements()
-        );
-
-        return paginatedTransactionResponse;
-    }
-
-    @Override
-    public PaginatedResponseDto<TransactionResponseDto> getAllByCustomerId(Integer page, Integer size) {
-        UUID customerId = principalService.getPrincipal().getId();
-        userRepo.findById(customerId).orElseThrow(
-                () -> new NotFoundException("Customer not found")
-        );
-        if (page < 1) {
-            throw new InvalidPageException("Invalid requested page, minimum 1");
-        }
-        if (size < 5) {
-            throw new InvalidPageException("Invalid requested page size, minimum 5");
-        }
-        Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Transaction> transactionPage = transactionRepo.findByCustomerId(customerId, pageable);
-
-        List<Transaction> transactionList = transactionPage.getContent();
-        List<TransactionResponseDto> transactionResponseDtoList = new ArrayList<>();
-        for (Transaction v : transactionList) {
-            TransactionResponseDto responseDto = new TransactionResponseDto(
-                    v.getId().toString(), v.getCode(), v.getTotalBill().toString(),
-                    v.getAccountNumber(), v.getStatus().getName(), v.getCustomer().getName(),
-                    v.getGateway().getName(), v.getProduct().getName());
-            transactionResponseDtoList.add(responseDto);
-        }
-
-        PaginatedResponseDto<TransactionResponseDto> paginatedTransactionResponse = new PaginatedResponseDto<>(
-                transactionResponseDtoList,
-                transactionPage.getTotalElements()
-        );
-
-        return paginatedTransactionResponse;
-    }
-
-    @Override
-    public PaginatedResponseDto<TransactionResponseDto> getAllByGatewayId(Integer page, Integer size) {
         UUID userId = principalService.getPrincipal().getId();
-        GatewayUser gatewayUser = gatewayUserRepo.findByUserId(userId).orElseThrow(
-                () -> new NotFoundException("Gateway user not found")
+        User user = userRepo.findById(userId).orElseThrow(
+                () -> new NotFoundException("User not found")
         );
-        if (page < 1) {
-            throw new InvalidPageException("Invalid requested page, minimum 1");
-        }
-        if (size < 5) {
-            throw new InvalidPageException("Invalid requested page size, minimum 5");
-        }
-        Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Transaction> transactionPage = transactionRepo.findByGatewayId(gatewayUser.getGateway().getId(), pageable);
 
-        List<Transaction> transactionList = transactionPage.getContent();
-        List<TransactionResponseDto> transactionResponseDtoList = new ArrayList<>();
-        for (Transaction v : transactionList) {
-            TransactionResponseDto responseDto = new TransactionResponseDto(
-                    v.getId().toString(), v.getCode(), v.getTotalBill().toString(),
-                    v.getAccountNumber(), v.getStatus().getName(), v.getCustomer().getName(),
-                    v.getGateway().getName(), v.getProduct().getName());
-            transactionResponseDtoList.add(responseDto);
-        }
+        Page<Transaction> transactionPage = fetchHistoryPage(user, pageable);
+        List<TransactionResponseDto> responseDtoList = transactionPage.getContent().stream()
+                .map(this::mapToResponse)
+                .toList();
 
         PaginatedResponseDto<TransactionResponseDto> paginatedTransactionResponse = new PaginatedResponseDto<>(
-                transactionResponseDtoList,
+                responseDtoList,
                 transactionPage.getTotalElements()
         );
 
@@ -299,6 +228,37 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
                 "email-template-transaction-updated",
                 context
         );
+    }
+
+    private void validatePagination(Integer page, Integer size) {
+        if (page < 1) {
+            throw new InvalidPageException("Invalid requested page, minimum 1");
+        }
+        if (size < 5) {
+            throw new InvalidPageException("Invalid requested page size, minimum 5");
+        }
+    }
+
+    private Page<Transaction> fetchHistoryPage(User user, Pageable pageable) {
+        if (user.getUserRole().getCode().equals(RoleCode.SUPERADMIN.getCode())) {
+            return transactionRepo.findAll(pageable);
+        } else if (user.getUserRole().getCode().equals(RoleCode.CUSTOMER.getCode())) {
+            return transactionRepo.findByCustomerId(user.getId(), pageable);
+        } else if (user.getUserRole().getCode().equals(RoleCode.GATEWAY.getCode())) {
+            GatewayUser gatewayUser = gatewayUserRepo.findByUserId(user.getId()).orElseThrow(
+                    () -> new NotFoundException("Gateway user not found")
+            );
+            return transactionRepo.findByGatewayId(gatewayUser.getGateway().getId(), pageable);
+        } else {
+            throw new NotFoundException("Invalid user role");
+        }
+    }
+
+    private TransactionResponseDto mapToResponse(Transaction v) {
+        return new TransactionResponseDto(
+                v.getId().toString(), v.getCode(), v.getTotalBill().toString(),
+                v.getAccountNumber(), v.getStatus().getName(), v.getCustomer().getName(),
+                v.getGateway().getName(), v.getProduct().getName());
     }
 
 }
