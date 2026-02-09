@@ -24,6 +24,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -58,8 +59,9 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
         this.rabbitTemplate = rabbitTemplate;
     }
 
+    @Cacheable(value = "transactions", key = "'page:' + #page + 'size:' + #size + 'roleCode:' + #roleCode + 'filterId:' + #filterId")
     @Override
-    public PaginatedResponseDto<TransactionResponseDto> getAll(Integer page, Integer size) {
+    public PaginatedResponseDto<TransactionResponseDto> getAll(Integer page, Integer size, String roleCode, String filterId) {
 
         validatePagination(page, size);
         Pageable pageable = PageRequest.of(page - 1, size);
@@ -82,7 +84,7 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
         return paginatedTransactionResponse;
     }
 
-    @CacheEvict(value = "histories", allEntries = true)
+    @CacheEvict(value = {"histories", "transactions"}, allEntries = true)
     @Transactional(rollbackOn = Exception.class)
     @Override
     public CreateResponseDto create(CreateTransactionRequestDto data) {
@@ -130,7 +132,7 @@ public class TransactionServiceImpl extends BaseService implements TransactionSe
         return new CreateResponseDto(createdTransaction.getId(), ResponseMessage.CREATED.getMessage());
     }
 
-    @CacheEvict(value = "histories", allEntries = true)
+    @CacheEvict(value = {"histories", "transactions"}, allEntries = true)
     @Transactional(rollbackOn = Exception.class)
     @Override
     public UpdateResponseDto update(String id, String action, Integer version) {

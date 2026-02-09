@@ -11,6 +11,8 @@ public class TransactionResponseDto {
     private String gatewayName;
     private String productName;
 
+    public TransactionResponseDto() {}
+
     public TransactionResponseDto(String id, String code, String totalBill, String virtualNumber, String statusName, String customerName, String gatewayName, String productName) {
         this.id = id;
         this.code = code;

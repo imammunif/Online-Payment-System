@@ -8,7 +8,7 @@ import com.dansmultipro.ops.dto.transaction.TransactionResponseDto;
 
 public interface TransactionService {
 
-    PaginatedResponseDto<TransactionResponseDto> getAll(Integer page, Integer size);
+    PaginatedResponseDto<TransactionResponseDto> getAll(Integer page, Integer size, String roleCode, String filterId);
 
     CreateResponseDto create(CreateTransactionRequestDto data);
 
