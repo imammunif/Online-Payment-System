@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,7 +25,7 @@ public class TokenFilter extends OncePerRequestFilter {
 
     private final List<RequestMatcher> requestMatchers;
 
-    public TokenFilter(List<RequestMatcher> requestMatchers) {
+    public TokenFilter(@Qualifier("getRequestMatchers") List<RequestMatcher> requestMatchers) {
         this.requestMatchers = requestMatchers;
     }
 
